@@ -1,6 +1,6 @@
 context:
   version: "0.1.0"
-  python_min: "3.10"
+  python_min: "3.11"
 
 package:
   name: omsf-prefix-smoke
