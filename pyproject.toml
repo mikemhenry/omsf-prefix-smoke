@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omsf-prefix-smoke"
+version = "0.1.0"
+description = "A minimal end-to-end smoke test for OMSF conda package publishing through prefix.dev"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+  { name = "Open Molecular Software Foundation" },
+]
+keywords = ["conda", "prefix.dev", "supply-chain", "smoke-test", "omsf"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Software Development :: Testing",
+  "Topic :: System :: Software Distribution",
+]
+dependencies = [
+  "packaging>=24",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8",
+  "pytest-cov>=5",
+]
+quality = [
+  "mypy>=1.15",
+  "ruff>=0.11",
+]
+dev = [
+  "omsf-prefix-smoke[test,quality]",
+]
+
+[project.scripts]
+omsf-prefix-smoke = "omsf_prefix_smoke.cli:main"
+
+[project.urls]
+Homepage = "https://omsf.io"
+Repository = "https://github.com/omsf/omsf-prefix-smoke"
+Issues = "https://github.com/omsf/omsf-prefix-smoke/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+omsf_prefix_smoke = ["data/*.json", "py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["omsf_prefix_smoke"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+packages = ["omsf_prefix_smoke"]

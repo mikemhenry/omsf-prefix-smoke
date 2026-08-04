@@ -1,0 +1,55 @@
+name: Publish to prefix.dev
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: prefix-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PREFIX_CHANNEL: ${{ vars.PREFIX_CHANNEL || 'mmh/omsf-test' }}
+
+jobs:
+  publish:
+    name: Build, attest, and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - name: Confirm release tag matches package metadata
+        run: python scripts/check_release_tag.py "${GITHUB_REF_NAME}"
+
+      - name: Build and test conda package
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        with:
+          rattler-build-version: v0.72.2
+          recipe-path: conda.recipe/recipe.yaml
+          artifact-name: omsf-prefix-smoke-conda
+
+      - name: Publish with Sigstore attestations
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mapfile -t packages < <(find output -type f \( -name '*.conda' -o -name '*.tar.bz2' \) -print)
+          if [[ ${#packages[@]} -ne 1 ]]; then
+            printf 'expected exactly one built package, found %s\n' "${#packages[@]}" >&2
+            printf '%s\n' "${packages[@]}" >&2
+            exit 1
+          fi
+          rattler-build upload prefix \
+            --channel "${PREFIX_CHANNEL}" \
+            --generate-attestation \
+            --store-github-attestation \
+            "${packages[0]}"

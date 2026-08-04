@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Environments
+.venv/
+.pixi/
+
+# Rattler-Build
+output/
+.bld/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/

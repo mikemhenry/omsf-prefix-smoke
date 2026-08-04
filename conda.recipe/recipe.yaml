@@ -1,0 +1,51 @@
+context:
+  version: "0.1.0"
+  python_min: "3.10"
+
+package:
+  name: omsf-prefix-smoke
+  version: ${{ version }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  noarch: python
+  script: ${{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
+  python:
+    entry_points:
+      - omsf-prefix-smoke = omsf_prefix_smoke.cli:main
+
+requirements:
+  host:
+    - python ${{ python_min }}.*
+    - pip
+    - setuptools >=77
+  run:
+    - python >=${{ python_min }}
+    - packaging >=24
+
+tests:
+  - python:
+      imports:
+        - omsf_prefix_smoke
+        - omsf_prefix_smoke.verification
+      pip_check: true
+      python_version:
+        - ${{ python_min ~ ".*" }}
+  - script:
+      - omsf-prefix-smoke verify
+      - python -m omsf_prefix_smoke verify
+
+about:
+  homepage: https://omsf.io
+  repository: https://github.com/omsf/omsf-prefix-smoke
+  documentation: https://github.com/omsf/omsf-prefix-smoke#readme
+  license: MIT
+  license_file: LICENSE
+  summary: Minimal end-to-end smoke test for OMSF package publishing through prefix.dev
+  description: |
+    omsf-prefix-smoke is a deliberately small noarch Python package used to test
+    package building, prefix.dev Repository Access publishing, Sigstore
+    attestations, channel indexing, lock generation, and verified installation.

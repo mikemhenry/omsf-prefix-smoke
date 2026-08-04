@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install package and test dependencies
+        run: python -m pip install --disable-pip-version-check --no-input -e '.[test]'
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Run installed smoke test
+        run: omsf-prefix-smoke verify --pretty
+
+  conda-package:
+    name: Build noarch conda package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build and test conda package
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        with:
+          rattler-build-version: v0.72.2
+          recipe-path: conda.recipe/recipe.yaml
+          artifact-name: omsf-prefix-smoke-conda
